@@ -6,6 +6,32 @@ from django.conf import settings
 from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
 
+
+def send_otp_email(user, otp_code):
+    subject = "Your OTP code"
+    message = (
+        f"Hello {user.username},\n\n"
+        f"Your OTP verification code is {otp_code}.\n"
+        "Use it to complete your login."
+    )
+    from_email = settings.DEFAULT_FROM_EMAIL
+    recipient_list = [user.email]
+
+    if not user.email:
+        return False
+
+    try:
+        send_mail(
+            subject=subject,
+            message=message,
+            from_email=from_email,
+            recipient_list=recipient_list,
+            fail_silently=False,
+        )
+        return True
+    except Exception:
+        return False
+
 from .models import OTP
 
 
@@ -51,23 +77,20 @@ class LoginSerializer(serializers.Serializer):
         otp_code = f"{random.randint(100000, 999999)}"
         OTP.objects.filter(user=user).delete()
         otp_obj = OTP.objects.create(user=user, otp_code=otp_code)
-        try:
-            send_mail(
-                subject="Your OTP code",
-                message=f"Your OTP verification code is {otp_code}",
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[user.email],
-                fail_silently=True,
-            )
-        except Exception:
-            # Keep login working even when email delivery is unavailable.
-            pass
+        email_sent = send_otp_email(user, otp_code)
+
+        detail = (
+            "OTP sent to your email. Please verify it to complete login."
+            if email_sent
+            else "OTP generated successfully. Please use the code shown below to complete login."
+        )
 
         return {
-            "detail": "OTP sent to your email. Please verify it to complete login.",
+            "detail": detail,
             "user_id": user.id,
             "otp_id": otp_obj.id,
             "otp_code": otp_code,
+            "email_sent": email_sent,
         }
 
 

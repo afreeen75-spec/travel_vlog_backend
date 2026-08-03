@@ -2,6 +2,7 @@ import json
 
 from django.contrib.auth import logout
 from django.contrib.auth.models import User
+from django.db import models
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -135,3 +136,36 @@ class LogoutView(APIView):
         if x_forwarded_for:
             return x_forwarded_for.split(",")[0]
         return request.META.get("REMOTE_ADDR")
+
+
+class ActivityLogListView(generics.ListAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = None
+
+    def get_queryset(self):
+        search = (self.request.query_params.get("search") or "").strip()
+        queryset = ActivityLog.objects.select_related("user").all()
+
+        if search:
+            queryset = queryset.filter(
+                models.Q(action__icontains=search)
+                | models.Q(details__icontains=search)
+                | models.Q(user__username__icontains=search)
+            )
+
+        return queryset
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        data = [
+            {
+                "id": log.id,
+                "user": log.user.username if log.user else "System",
+                "action": log.action,
+                "details": log.details,
+                "timestamp": log.timestamp.isoformat(),
+                "ip_address": log.ip_address,
+            }
+            for log in queryset
+        ]
+        return Response(data)

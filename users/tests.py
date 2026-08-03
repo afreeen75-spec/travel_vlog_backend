@@ -5,6 +5,10 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from travel.models import Destination
+
+from .models import ActivityLog
+
 
 class AuthAPITests(APITestCase):
     def setUp(self):
@@ -74,3 +78,44 @@ class AuthAPITests(APITestCase):
 
         delete_response = self.client.delete(detail_url)
         self.assertEqual(delete_response.status_code, status.HTTP_204_NO_CONTENT)
+
+    def test_posts_list_supports_backend_search(self):
+        self.client.force_authenticate(user=self.user)
+        self.client.post(
+            reverse("post-list"),
+            {"title": "Summer Escape", "description": "A tropical getaway"},
+            format="json",
+        )
+
+        response = self.client.get(reverse("post-list"), {"search": "tropical"})
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]["title"], "Summer Escape")
+
+    def test_logs_endpoint_returns_filtered_activity_logs(self):
+        self.client.force_authenticate(user=self.user)
+        ActivityLog.objects.create(user=self.user, action="Login", details="Login initiated")
+        ActivityLog.objects.create(user=self.user, action="Create Post", details="Created a special post")
+
+        response = self.client.get(reverse("activity-logs"), {"search": "special"})
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]["details"], "Created a special post")
+
+    def test_travel_list_supports_backend_search(self):
+        Destination.objects.create(
+            title="Santorini Escape",
+            description="Breathtaking blue domes",
+            country="Greece",
+            city="Santorini",
+            travel_category="Island",
+            author=self.user,
+        )
+
+        response = self.client.get(reverse("destination-list"), {"search": "breathtaking"})
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]["title"], "Santorini Escape")

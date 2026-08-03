@@ -106,9 +106,9 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "mydb",          # Change if your database has a different name
+        "NAME": "postgres",          # Change if your database has a different name
         "USER": "postgres",
-        "PASSWORD": "admin123",
+        "PASSWORD": "NewPassword123",
         "HOST": "localhost",
         "PORT": "5432",
     }
@@ -150,6 +150,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 from datetime import timedelta
 
 REST_FRAMEWORK = {
