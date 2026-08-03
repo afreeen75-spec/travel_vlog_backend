@@ -9,4 +9,4 @@ psycopg2-binary==2.9.12
 PyJWT==2.13.0
 sqlparse==0.5.5
 tzdata==2026.3
-gunicorn==22.1.0
+gunicorn==26.0.0
