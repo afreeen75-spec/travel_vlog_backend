@@ -9,7 +9,6 @@ https://docs.djangoproject.com/en/6.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
-
 import os
 from pathlib import Path
 
@@ -41,12 +40,15 @@ load_env_file()
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-yu1g9!hi4pyfp=*x#kjqngrmk)$iz9www%p%swv^(ijxvkpuh%'
+# SECRET_KEY = 'django-insecure-yu1g9!hi4pyfp=*x#kjqngrmk)$iz9www%p%swv^(ijxvkpuh%'
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# # SECURITY WARNING: don't run with debug turned on in production!
+# DEBUG = True
 
-ALLOWED_HOSTS = ["127.0.0.1", "localhost", "travelvlogbackend-production.up.railway.app"]
+# ALLOWED_HOSTS = ["127.0.0.1", "localhost", "travelvlogbackend-production.up.railway.app"]
+SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-yu1g9!hi4pyfp=*x#kjqngrmk)$iz9www%p%swv^(ijxvkpuh%")
+DEBUG = os.getenv("DEBUG", "False").lower() in {"1", "true", "yes", "on"}
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")
 
 
 # Application definition
@@ -103,15 +105,22 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.postgresql",
+#         "NAME": "postgres",          # Change if your database has a different name
+#         "USER": "postgres",
+#         "PASSWORD": "NewPassword123",
+#         "HOST": "localhost",
+#         "PORT": "5432",
+#     }
+# }
+import dj_database_url
+
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": "postgres",          # Change if your database has a different name
-        "USER": "postgres",
-        "PASSWORD": "NewPassword123",
-        "HOST": "localhost",
-        "PORT": "5432",
-    }
+    "default": dj_database_url.config(
+        default=os.getenv("DATABASE_URL", "postgres://postgres:admin123@localhost:5432/mydb")
+    )
 }
 
 
