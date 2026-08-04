@@ -46,11 +46,7 @@ SECRET_KEY = 'django-insecure-yu1g9!hi4pyfp=*x#kjqngrmk)$iz9www%p%swv^(ijxvkpuh%
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [
-    "travellogbackend-production.up.railway.app",
-    "localhost",
-    "127.0.0.1",
-]
+ALLOWED_HOSTS = ["127.0.0.1", "localhost", "travelvlogbackend-production.up.railway.app"]
 
 
 # Application definition
@@ -170,9 +166,11 @@ SIMPLE_JWT = {
 }
 
 CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
     "https://travelvlog-production.up.railway.app",
-    # "http://127.0.0.1:3000",
 ]
+
 CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOW_CREDENTIALS = False
 CORS_ALLOW_METHODS = [
