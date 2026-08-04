@@ -48,7 +48,14 @@ load_env_file()
 # ALLOWED_HOSTS = ["127.0.0.1", "localhost", "travelvlogbackend-production.up.railway.app"]
 SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-yu1g9!hi4pyfp=*x#kjqngrmk)$iz9www%p%swv^(ijxvkpuh%")
 DEBUG = os.getenv("DEBUG", "False").lower() in {"1", "true", "yes", "on"}
-ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")
+ALLOWED_HOSTS = [
+    host.strip()
+    for host in os.getenv(
+        "ALLOWED_HOSTS",
+        "127.0.0.1,localhost,travelvlogbackend-production.up.railway.app",
+    ).split(",")
+    if host.strip()
+]
 
 
 # Application definition
